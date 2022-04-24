@@ -24,6 +24,7 @@ class UI{
         
         list.appendChild(row);
     }
+
 // After Taking Value Remove Filds
     static clearFilds(){
         document.querySelector("#title").value = "";
@@ -46,14 +47,52 @@ class UI{
     static deleteFromBook(target){
         if (target.hasAttribute("href")){
             target.parentElement.parentElement.remove();
+            Store.removeBook(target.parentElement.previousElementSibling.textContent.trim());
             UI.showAlart("Book Removed!", "succes");
         }
+    }
+}
+
+// Local Storage
+class Store{
+    static getBook(){
+        let books;
+        if(localStorage.getItem("books") === null){
+            books = [];
+        }else{
+            books = JSON.parse(localStorage.getItem("books"));
+        }
+        return books;
+    }
+
+    static addBook(book){
+        let books = Store.getBook();
+        books.push(book);
+        localStorage.setItem("books", JSON.stringify(books));
+    }
+
+    static dispalyBook(){
+        let books = Store.getBook();
+        books.forEach(book =>{
+            UI.addToBookList(book);
+        });
+    }
+
+    static removeBook(isbn){
+        let books = Store.getBook();
+        books.forEach((book, index) =>{
+            if(book.isbn === isbn){
+                books.splice(index, 1);
+            }
+        })
+        localStorage.setItem("books", JSON.stringify(books));
     }
 }
 
 // Add Event Listener
 form.addEventListener("submit", newBook);
 bookList.addEventListener("click", removeBook);
+document.addEventListener("DOMContentLoaded", Store.dispalyBook);
 
 // Define function 
 function newBook (e){
@@ -69,6 +108,8 @@ function newBook (e){
         UI.addToBookList(book);
         UI.clearFilds();
         UI.showAlart("Book Added!", "succes");
+        // Invoc for local storage
+        Store.addBook(book);
     }
     
     e.preventDefault();
@@ -80,3 +121,4 @@ function removeBook(e){
    
    e.preventDefault();
 }
+
